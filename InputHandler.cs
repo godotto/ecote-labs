@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace input_handler
 {
     public class InputHandler
