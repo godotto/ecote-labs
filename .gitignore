@@ -1,0 +1,5 @@
+# Visual Studio Code workspace config
+.vscode/
+
+# .NET project stuff
+obj/
