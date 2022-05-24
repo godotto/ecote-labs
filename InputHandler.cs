@@ -31,6 +31,7 @@ public class InputHandler
     {
         var lexer = new Lexer();
         var line = Console.ReadLine();
+        // var line = "12a + b";
 
         try
         {

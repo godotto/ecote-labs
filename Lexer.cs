@@ -6,7 +6,8 @@ public class Lexer
 {
     private char[] whitespaceCharacters;
     private int currentLine = 1;
-    private int currentCharacter = 0;
+    private int currentCharacter;
+    private string loadedSource;
     public List<Token> Tokens { get; }
 
     public Lexer()
@@ -17,70 +18,146 @@ public class Lexer
 
     public void Scan(string sourceCode)
     {
+        loadedSource = sourceCode;
+
+        for (currentCharacter = 1; currentCharacter <= loadedSource.Length; currentCharacter++)
+        {
+            var character = CurrentCharacter();
+
+            switch (character)
+            {
+                case '+':
+                    Tokens.Add(new Token(TokenType.Plus, character.ToString(), currentLine));
+                    break;
+                case '-':
+                    Tokens.Add(new Token(TokenType.Minus, character.ToString(), currentLine));
+                    break;
+                case '*':
+                    Tokens.Add(new Token(TokenType.Asterisk, character.ToString(), currentLine));
+                    break;
+                case '/':
+                    Tokens.Add(new Token(TokenType.Slash, character.ToString(), currentLine));
+                    break;
+                case '(':
+                    Tokens.Add(new Token(TokenType.LeftBracket, character.ToString(), currentLine));
+                    break;
+                case ')':
+                    Tokens.Add(new Token(TokenType.RightBracket, character.ToString(), currentLine));
+                    break;
+                case '=':
+                    Tokens.Add(new Token(TokenType.Equal, character.ToString(), currentLine));
+                    break;
+                case '\n':
+                    Tokens.Add(new Token(TokenType.NewLine, character.ToString(), currentLine));
+                    currentLine++;
+                    break;
+                default:
+                    if (char.IsLetter(character))
+                    {
+                        ScanIdentifier();
+                        break;
+                    }
+                    else if (char.IsDigit(character))
+                    {
+                        ScanTimeLiteral();
+                        break;
+                    }
+                    else if (IsWhitespace(character))
+                        break;
+
+                    throw new UnexpectedCharacter(character, currentLine);
+            }
+        }
+    }
+
+    private void ScanIdentifier()
+    {
         var consumedCharacters = new StringBuilder();
 
-        foreach (var character in sourceCode)
+        for (; currentCharacter <= loadedSource.Length; currentCharacter++)
         {
-            currentCharacter++;
+            consumedCharacters.Append(CurrentCharacter());
 
-            if (!Array.Exists(whitespaceCharacters, element => element == character))
+            if (!char.IsLetterOrDigit(NextCharacter()))
+                break;
+        }
+
+        Tokens.Add(new Token(TokenType.Identifier, consumedCharacters.ToString(), currentLine));
+    }
+
+    private void ScanTimeLiteral()
+    {
+        var consumedCharacters = new StringBuilder();
+        bool isDecimalPointEncountered = false;
+
+        for (; currentCharacter <= loadedSource.Length; currentCharacter++)
+        {
+            if (CurrentCharacter() == '.')
             {
-                consumedCharacters.Append(character);
+                if (isDecimalPointEncountered)
+                    throw new UnexpectedCharacter(CurrentCharacter(), currentLine, $"Unexpected additional decimal point at line {currentLine}");
 
-                if (currentCharacter != sourceCode.Length)
-                    continue;
+                isDecimalPointEncountered = true;
             }
 
-            ScanToken(consumedCharacters);
-            consumedCharacters.Clear();
+            consumedCharacters.Append(CurrentCharacter());
+
+            if (!char.IsDigit(NextCharacter()) && (NextCharacter() != '.'))
+                break;
         }
+
+        if (NextCharacter() == 's' || NextCharacter() == 'h')
+        {
+            currentCharacter++;
+            consumedCharacters.Append(CurrentCharacter());
+        }
+        else if (NextCharacter() == 'm')
+        {
+            currentCharacter++;
+            consumedCharacters.Append(CurrentCharacter());
+
+            if (NextCharacter() == 'i')
+            {
+                currentCharacter++;
+                consumedCharacters.Append(CurrentCharacter());
+
+                if (NextCharacter() == 'n')
+                {
+                    currentCharacter++;
+                    consumedCharacters.Append(CurrentCharacter());
+                } // TODO: refactor this abomination 
+                else
+                    throw new UnexpectedCharacter(NextCharacter(), currentLine, $"Unexpected wrong time suffix character at line {currentLine}");
+            }
+            else
+                throw new UnexpectedCharacter(NextCharacter(), currentLine, $"Unexpected wrong time suffix character at line {currentLine}");
+        }
+        else
+            throw new UnexpectedCharacter(NextCharacter(), currentLine, $"Unexpected wrong time suffix character at line {currentLine}");
+
+        Tokens.Add(new Token(TokenType.Time, consumedCharacters.ToString(), currentLine));
     }
 
-    private void ScanToken(StringBuilder consumedCharacters)
+    private bool IsAtEnd()
     {
-        try
-        {
-            if (consumedCharacters.Length == 1)
-                ScanSingleCharacterToken(consumedCharacters.ToString());
-        }
-        catch (UnexpectedCharacter e)
-        {
-            Console.WriteLine($"Lexer error for \"{e.Character}\" lexemme.");
-            throw;
-        }
+        return loadedSource.Length <= currentCharacter;
     }
 
-    private void ScanSingleCharacterToken(string character)
+    private char CurrentCharacter()
     {
-        switch (character)
-        {
-            case "+":
-                Tokens.Add(new Token(TokenType.Plus, character, currentLine));
-                break;
-            case "-":
-                Tokens.Add(new Token(TokenType.Minus, character, currentLine));
-                break;
-            case "*":
-                Tokens.Add(new Token(TokenType.Asterisk, character, currentLine));
-                break;
-            case "/":
-                Tokens.Add(new Token(TokenType.Slash, character, currentLine));
-                break;
-            case "(":
-                Tokens.Add(new Token(TokenType.LeftBracket, character, currentLine));
-                break;
-            case ")":
-                Tokens.Add(new Token(TokenType.RightBracket, character, currentLine));
-                break;
-            case "=":
-                Tokens.Add(new Token(TokenType.Equal, character, currentLine));
-                break;
-            case "\n":
-                Tokens.Add(new Token(TokenType.NewLine, character, currentLine));
-                currentLine++;
-                break;
-            default:
-                throw new UnexpectedCharacter(character, currentLine);
-        }
+        return loadedSource[currentCharacter - 1];
+    }
+
+    private char NextCharacter()
+    {
+        if (!IsAtEnd())
+            return loadedSource[currentCharacter];
+        else
+            return '\0';
+    }
+
+    private bool IsWhitespace(char character)
+    {
+        return Array.Exists(whitespaceCharacters, element => element == character);
     }
 }
