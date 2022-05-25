@@ -7,12 +7,28 @@ public class Parser
     private List<Token> tokens;
     private int currentToken;
 
-    public IExpression Parse(List<Token> tokens)
+    public List<IExpression> Parse(List<Token> tokens)
     {
         this.tokens = tokens;
         currentToken = 0;
+        var statements = new List<IExpression>();
 
-        return Expression();
+        while (!IsAtEnd())
+        {
+            statements.Add(Statement());
+            currentToken++;
+        }
+
+        return statements;
+    }
+
+    private IExpression Statement()
+    {
+        var expression = Expression();
+
+        if (CheckTokenType(NextToken(), TokenType.NewLine))
+            currentToken++;
+        return expression;
     }
 
     private IExpression Expression()

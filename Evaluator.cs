@@ -9,7 +9,15 @@ public class Evaluator
     private const string minute = "min";
     private const string hour = "h";
 
-    public Time Evaluate(IExpression expression)
+    public void Evaluate(List<IExpression> expressions)
+    {
+        foreach (var expression in expressions)
+        {
+            Console.WriteLine(Evaluate(expression).ToString());
+        }
+    }
+
+    private Time Evaluate(IExpression expression)
     {
         if (expression is Binary)
             return EvaluateBinary(expression as Binary);
