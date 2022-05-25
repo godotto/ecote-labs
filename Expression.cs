@@ -8,46 +8,46 @@ public interface IExpression
 
 public class Binary : IExpression
 {
-    private IExpression left;
-    private Token binaryOperator;
-    private IExpression right;
+    public IExpression Left { get; }
+    public Token BinaryOperator { get; }
+    public IExpression Right { get; }
 
     public Binary(IExpression left, Token binaryOperator, IExpression right)
     {
-        this.left = left;
-        this.binaryOperator = binaryOperator;
-        this.right = right;
+        this.Left = left;
+        this.BinaryOperator = binaryOperator;
+        this.Right = right;
     }
 }
 
 public class Assignment : IExpression
 {
-    private Token identifier;
-    private IExpression value;
+    public Token Identifier { get; }
+    public IExpression Value { get; }
 
     public Assignment(Token identifier, IExpression value)
     {
-        this.identifier = identifier;
-        this.value = value;
+        this.Identifier = identifier;
+        this.Value = value;
     }
 }
 
 public class Grouping : IExpression
 {
-    private IExpression expression;
+    public IExpression Expression { get; }
 
     public Grouping(IExpression expression)
     {
-        this.expression = expression;
+        this.Expression = expression;
     }
 }
 
 public class Literal : IExpression
 {
-    private Token value;
+    public Token Value { get; }
 
     public Literal(Token value)
     {
-        this.value = value;
+        this.Value = value;
     }
 }
