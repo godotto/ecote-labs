@@ -38,3 +38,39 @@ namespace Lexing
         }
     }
 }
+
+namespace Parsing
+{
+    public class SyntaxError : Exception
+    {
+        public int Line { get; }
+
+        public SyntaxError()
+            : base()
+        { }
+
+        public SyntaxError(int line)
+            : base($"Syntax error at line {line}.")
+        {
+            Line = line;
+        }
+
+        public SyntaxError(int line, string message)
+            : base($"Syntax error at line {line}. {message}")
+        {
+            Line = line;
+        }
+
+        public SyntaxError(int line, Exception innerException)
+            : base($"Syntax error at line {line}.", innerException)
+        {
+            Line = line;
+        }
+
+        public SyntaxError(int line, string message, Exception innerException)
+            : base($"Syntax error at line {line}. {message}", innerException)
+        {
+            Line = line;
+        }
+    }
+}

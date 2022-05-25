@@ -7,7 +7,7 @@ public class Lexer
     private char[] whitespaceCharacters; // collect all possible whitespace characters (except for new line character)
     private int currentLine = 1;    // track current line in order to provide location of tokens
     private int currentCharacter;
-    private string loadedSource;
+    private string sourceCode;
     public List<Token> Tokens { get; }
 
     public Lexer()
@@ -18,9 +18,9 @@ public class Lexer
 
     public void Scan(string sourceCode)
     {
-        loadedSource = sourceCode;
+        this.sourceCode = sourceCode;
 
-        for (currentCharacter = 1; currentCharacter <= loadedSource.Length; currentCharacter++)
+        for (currentCharacter = 1; currentCharacter <= this.sourceCode.Length; currentCharacter++)
         {
             var character = CurrentCharacter();
 
@@ -69,13 +69,16 @@ public class Lexer
                     throw new UnexpectedCharacter(character, currentLine);
             }
         }
+
+        // append with empty string as EOF termination
+        Tokens.Add(new Token(TokenType.Eof, "", currentLine));
     }
 
     private void ScanIdentifier()
     {
         var consumedCharacters = new StringBuilder();
 
-        for (; currentCharacter <= loadedSource.Length; currentCharacter++)
+        for (; currentCharacter <= sourceCode.Length; currentCharacter++)
         {
             consumedCharacters.Append(CurrentCharacter());
 
@@ -89,9 +92,9 @@ public class Lexer
     private void ScanTimeLiteral()
     {
         var consumedCharacters = new StringBuilder();
-        bool isDecimalPointEncountered = false; // keep track of decimal point (there can be only 0 or 1 of them)
+        var isDecimalPointEncountered = false; // keep track of decimal point (there can be only 0 or 1 of them)
 
-        for (; currentCharacter <= loadedSource.Length; currentCharacter++)
+        for (; currentCharacter <= sourceCode.Length; currentCharacter++)
         {
             if (CurrentCharacter() == '.')
             {
@@ -113,9 +116,9 @@ public class Lexer
             currentCharacter++;
             consumedCharacters.Append(CurrentCharacter());
         }
-        else if (loadedSource.Substring(currentCharacter, 3) == "min")
+        else if (sourceCode.Substring(currentCharacter, 3) == "min")
         {
-            consumedCharacters.Append(loadedSource.Substring(currentCharacter, 3));
+            consumedCharacters.Append(sourceCode.Substring(currentCharacter, 3));
             currentCharacter += 3;
         }
         else
@@ -127,18 +130,18 @@ public class Lexer
     // --------------- auxiliary methods -------------------
     private bool IsAtEnd()
     {
-        return loadedSource.Length <= currentCharacter;
+        return sourceCode.Length <= currentCharacter;
     }
 
     private char CurrentCharacter()
     {
-        return loadedSource[currentCharacter - 1];
+        return sourceCode[currentCharacter - 1];
     }
 
     private char NextCharacter()
     {
         if (!IsAtEnd())
-            return loadedSource[currentCharacter];
+            return sourceCode[currentCharacter];
         else
             return '\0';
     }
