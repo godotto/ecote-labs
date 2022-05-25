@@ -51,3 +51,13 @@ public class Literal : IExpression
         this.Value = value;
     }
 }
+
+public class Variable : IExpression
+{
+    public Token Identifier { get; }
+
+    public Variable(Token identifier)
+    {
+        this.Identifier = identifier;
+    }
+}

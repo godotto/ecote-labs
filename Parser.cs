@@ -33,13 +33,29 @@ public class Parser
 
     private IExpression Expression()
     {
-        return Term();
+        return Assignment();
     }
 
-    // private IExpression Assignment()
-    // {
+    private IExpression Assignment()
+    {
+        var expression = Term();
 
-    // }
+        if (CheckTokenType(NextToken(), TokenType.Equal))
+        {
+            currentToken += 2;
+            var value = Assignment();
+
+            if (expression is Variable)
+            {
+                Token identifier = (expression as Variable).Identifier;
+                return new Assignment(identifier, value);
+            }
+
+            throw new SyntaxError(CurrentToken().location, "Invalid assignment target.");
+        }
+
+        return expression;
+    }
 
     private IExpression Term()
     {
@@ -81,6 +97,8 @@ public class Parser
     {
         if (CheckTokenType(CurrentToken(), TokenType.Time))
             return new Literal(CurrentToken());
+        else if (CheckTokenType(CurrentToken(), TokenType.Identifier))
+            return new Variable(CurrentToken());
         else if (CheckTokenType(CurrentToken(), TokenType.LeftBracket))
         {
             currentToken++;
