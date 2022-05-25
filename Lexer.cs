@@ -4,8 +4,8 @@ namespace Lexing;
 
 public class Lexer
 {
-    private char[] whitespaceCharacters;
-    private int currentLine = 1;
+    private char[] whitespaceCharacters; // collect all possible whitespace characters (except for new line character)
+    private int currentLine = 1;    // track current line in order to provide location of tokens
     private int currentCharacter;
     private string loadedSource;
     public List<Token> Tokens { get; }
@@ -26,6 +26,7 @@ public class Lexer
 
             switch (character)
             {
+                // simple cases - single character tokens
                 case '+':
                     Tokens.Add(new Token(TokenType.Plus, character.ToString(), currentLine));
                     break;
@@ -54,12 +55,12 @@ public class Lexer
                 default:
                     if (char.IsLetter(character))
                     {
-                        ScanIdentifier();
+                        ScanIdentifier();   // identifiers of variables
                         break;
                     }
                     else if (char.IsDigit(character))
                     {
-                        ScanTimeLiteral();
+                        ScanTimeLiteral();  // numerical literals with time units
                         break;
                     }
                     else if (IsWhitespace(character))
@@ -78,7 +79,7 @@ public class Lexer
         {
             consumedCharacters.Append(CurrentCharacter());
 
-            if (!char.IsLetterOrDigit(NextCharacter()))
+            if (!char.IsLetterOrDigit(NextCharacter())) // unlike in the beginning of the token allow for digits inside
                 break;
         }
 
@@ -88,7 +89,7 @@ public class Lexer
     private void ScanTimeLiteral()
     {
         var consumedCharacters = new StringBuilder();
-        bool isDecimalPointEncountered = false;
+        bool isDecimalPointEncountered = false; // keep track of decimal point (there can be only 0 or 1 of them)
 
         for (; currentCharacter <= loadedSource.Length; currentCharacter++)
         {
@@ -106,31 +107,16 @@ public class Lexer
                 break;
         }
 
+        // manage the time unit at the end of literal
         if (NextCharacter() == 's' || NextCharacter() == 'h')
         {
             currentCharacter++;
             consumedCharacters.Append(CurrentCharacter());
         }
-        else if (NextCharacter() == 'm')
+        else if (loadedSource.Substring(currentCharacter, 3) == "min")
         {
-            currentCharacter++;
-            consumedCharacters.Append(CurrentCharacter());
-
-            if (NextCharacter() == 'i')
-            {
-                currentCharacter++;
-                consumedCharacters.Append(CurrentCharacter());
-
-                if (NextCharacter() == 'n')
-                {
-                    currentCharacter++;
-                    consumedCharacters.Append(CurrentCharacter());
-                } // TODO: refactor this abomination 
-                else
-                    throw new UnexpectedCharacter(NextCharacter(), currentLine, $"Unexpected wrong time suffix character at line {currentLine}");
-            }
-            else
-                throw new UnexpectedCharacter(NextCharacter(), currentLine, $"Unexpected wrong time suffix character at line {currentLine}");
+            consumedCharacters.Append(loadedSource.Substring(currentCharacter, 3));
+            currentCharacter += 3;
         }
         else
             throw new UnexpectedCharacter(NextCharacter(), currentLine, $"Unexpected wrong time suffix character at line {currentLine}");
@@ -138,6 +124,7 @@ public class Lexer
         Tokens.Add(new Token(TokenType.Time, consumedCharacters.ToString(), currentLine));
     }
 
+    // --------------- auxiliary methods -------------------
     private bool IsAtEnd()
     {
         return loadedSource.Length <= currentCharacter;

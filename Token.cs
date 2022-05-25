@@ -2,8 +2,11 @@ namespace Lexing;
 
 public enum TokenType
 {
+    // single characters
     Plus, Minus, Equal, Asterisk, Slash, LeftBracket, RightBracket,
+    // literals and variables
     Time, Identifier,
+    // special whitespace characters
     NewLine, Eof
 }
 
