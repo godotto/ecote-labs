@@ -18,6 +18,7 @@ public class Lexer
 
     public void Scan(string sourceCode)
     {
+        Tokens.Clear();
         this.sourceCode = sourceCode;
 
         for (currentCharacter = 1; currentCharacter <= this.sourceCode.Length; currentCharacter++)

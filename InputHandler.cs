@@ -1,4 +1,6 @@
 using Lexing;
+using Parsing;
+using Evalutaion;
 
 namespace InputHandling;
 
@@ -6,6 +8,9 @@ public class InputHandler
 {
     private string filename;
     public StartInterpreter startInterpreter;
+    private Lexer lexer = new Lexer();
+    private Parser parser = new Parser();
+    private Evaluator evaluator = new Evaluator();
 
     public InputHandler(string[] args)
     {
@@ -29,21 +34,26 @@ public class InputHandler
 
     private void InteractiveMode()
     {
-        var lexer = new Lexer();
-        var line = Console.ReadLine();
-        // var line = "12a + b";
+        var line = "";
 
-        try
+        while (true)
         {
-            lexer.Scan(line);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
-        foreach (var token in lexer.Tokens)
-        {
-            Console.WriteLine(token.lexeme);
+            Console.Write(">>> "); // prompt
+            line = Console.ReadLine() + '\n';
+
+            if (line.ToLower() == "exit\n") // terminate interpreter on "exit" command
+                break;
+
+            try
+            {
+                lexer.Scan(line);
+                List<IExpression> expressions = parser.Parse(lexer.Tokens);
+                evaluator.Evaluate(expressions);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
 
