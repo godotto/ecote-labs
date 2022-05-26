@@ -6,7 +6,7 @@ namespace InputHandling;
 
 public class InputHandler
 {
-    private string filename;
+    private string filePath;
     public StartInterpreter startInterpreter;
     private Lexer lexer = new Lexer();
     private Parser parser = new Parser();
@@ -24,7 +24,7 @@ public class InputHandler
                 throw new FileNotFoundException("File not found", args[0]);
             else
             {
-                filename = args[0];
+                filePath = args[0];
                 startInterpreter = FileMode;
             }
         }
@@ -59,7 +59,18 @@ public class InputHandler
 
     private void FileMode()
     {
+        var lines = System.IO.File.ReadAllLines(filePath);
 
+        try
+        {
+            lexer.Scan(String.Join('\n', lines));
+            List<IExpression> expressions = parser.Parse(lexer.Tokens);
+            evaluator.Evaluate(expressions);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 }
 

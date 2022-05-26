@@ -11,10 +11,11 @@ public class Environment
         if (!values.ContainsKey(identifier))
         {
             values.Add(identifier, value);
-            Console.Write(identifier + " = ");
         }
         else
             values[identifier] = value;
+
+        Console.Write(identifier + " = ");
     }
 
     public Time GetValue(Token identifier)

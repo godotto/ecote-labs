@@ -4,3 +4,6 @@
 # .NET project stuff
 obj/
 bin/
+
+# source files for testing purpose
+*.src
