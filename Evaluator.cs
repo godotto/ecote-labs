@@ -8,6 +8,7 @@ public class Evaluator
     private const string second = "s";
     private const string minute = "min";
     private const string hour = "h";
+    private Environment environment = new Environment();
 
     public void Evaluate(List<IExpression> expressions)
     {
@@ -25,14 +26,25 @@ public class Evaluator
             return EvaluateGrouping(expression as Grouping);
         else if (expression is Literal)
             return EvaluateLiteral(expression as Literal);
+        else if (expression is Variable)
+            return EvaluateVariable(expression as Variable);
+        else if (expression is Assignment)
+            return EvaluateAssignment(expression as Assignment);
 
         throw new Exception("error");
     }
 
+    private Time EvaluateAssignment(Assignment expression)
+    {
+        var value = Evaluate(expression.Value);
+        environment.AssignVariable(expression.Identifier.lexeme, value);
+        return value;
+    }
+
     private Time EvaluateBinary(Binary expression)
     {
-        Time left = Evaluate(expression.Left);
-        Time right = Evaluate(expression.Right);
+        var left = Evaluate(expression.Left);
+        var right = Evaluate(expression.Right);
 
         switch (expression.BinaryOperator.type)
         {
@@ -57,6 +69,11 @@ public class Evaluator
     private Time EvaluateLiteral(Literal expression)
     {
         return new Time(expression.Value.lexeme);
+    }
+
+    private Time EvaluateVariable(Variable variable)
+    {
+        return environment.GetValue(variable.Identifier);
     }
 
     private float Add(float left, float right) { return left + right; }

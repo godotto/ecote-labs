@@ -74,3 +74,44 @@ namespace Parsing
         }
     }
 }
+
+namespace Evalutaion
+{
+    public class UndefinedVariable : Exception
+    {
+        public int Line { get; }
+        public string Identifier { get; }
+
+        public UndefinedVariable()
+            : base()
+        { }
+
+        public UndefinedVariable(int line, string identifier)
+            : base($"Runtime error at {line}. Undefined variable {identifier}.")
+        {
+            Line = line;
+            Identifier = identifier;
+        }
+
+        public UndefinedVariable(int line, string identifier, string message)
+            : base($"Runtime error at line {line}. {message}")
+        {
+            Line = line;
+            Identifier = identifier;
+        }
+
+        public UndefinedVariable(int line, string identifier, Exception innerException)
+            : base($"Runtime error at {line}. Undefined variable {identifier}.", innerException)
+        {
+            Line = line;
+            Identifier = identifier;
+        }
+
+        public UndefinedVariable(int line, string identifier, string message, Exception innerException)
+            : base($"Runtime error at line {line}. {message}", innerException)
+        {
+            Line = line;
+            Identifier = identifier;
+        }
+    }
+}

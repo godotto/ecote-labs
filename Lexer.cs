@@ -122,7 +122,7 @@ public class Lexer
             currentCharacter += 3;
         }
         else
-            throw new UnexpectedCharacter(NextCharacter(), currentLine, $"Unexpected wrong time suffix character at line {currentLine}");
+            throw new UnexpectedCharacter(NextCharacter(), currentLine, $"Wrong time suffix character at line {currentLine}");
 
         Tokens.Add(new Token(TokenType.Time, consumedCharacters.ToString(), currentLine));
     }
